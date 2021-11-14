@@ -2,15 +2,12 @@ from miller_rabin import miller_rabin
 import sys, math, json, random
 
 def gcd(p, q):      
-    if q == 0:
-        return p
+    if q == 0: return p
     return gcd(q, p % q)
-  
-# Function to find the
-# lcm of two integers 
+
 
 def lcm(p, q):
-    return p * q / gcd(p, q)
+    return (p * q) / gcd(p, q)
   
 
 
@@ -25,7 +22,7 @@ def egcd(e, phi):
 
 def modinv(e, phi):      
     g, x, y = egcd(e, phi)
-    return x % phi
+    return int(x % phi)
   
 
 
@@ -39,48 +36,52 @@ def chineseremaindertheorem(dq, dp, p, q, c):
     return m
 
 
-def create_privat_key(e, phi_n):
-    d = 0
-    while True:
-        if  (e * d) % phi_n == 1: return d
-        d += 1
+# def create_privat_key(e, phi_n):
+#     d = 0
+#     while True:
+#         if (e * d) % phi_n == 1:
+#             return d
+#         d += 1
 
 
 def create_public_key(num):
-    e = random.randrange(2, num) 
-    while(math.gcd(e, num) != 1):
-        e = random.randrange(2, num) 
-    return e
+    e = random.randint(2, num) 
+    while(gcd(e, num) != 1):
+        e = random.randint(2, num)
+    return e 
 
-def generate_prime():
-    num = random.getrandbits(1024)
+
+def generate_prime(keylen):
+    num = random.randint(0, keylen)
     while(miller_rabin(num) != True):
-        num = random.getrandbits(1024)
+        num = random.randint(0, keylen)
     return num
+
 
 def write_keys(keys):
     with open('keys.json', 'w+') as file:
-        file.write(json.dump(keys))
+        obj = json.dumps(keys)
+        file.write(obj)
 
 
 
 def encrypt(plaintext):
 
-    p = generate_prime()
-    print("[LOG] p generated.")
-    q = generate_prime()
-    print("[LOG] q generated.")
+    p = generate_prime(1024)
+    print("[LOG] p generated.", p)
+    q = generate_prime(1024)
+    print("[LOG] q generated.", q)
 
     n = p * q
 
     phi_n = (p - 1) * (q - 1)
-    print("[LOG] phi_n calculated.")
+    print("[LOG] phi_n calculated.", phi_n)
 
     e = create_public_key(phi_n)
-    print("[LOG] public key generated.")
+    print("[LOG] public key generated.", e)
 
-    d = create_privat_key(e, phi_n)
-    print("[LOG] privat key generated.")
+    d = modinv(e, lcm(p - 1, q - 1))
+    print("[LOG] privat key generated.", d)
 
     keys = {
         'p' : p,
@@ -90,6 +91,7 @@ def encrypt(plaintext):
         'd' : d}
     write_keys(keys)
     print("[LOG] keys wrote.")
+    print([str(pow(ord(letter), e, phi_n)) for letter in plaintext])
     chiphertext = "\n".join([str(pow(ord(letter), e, phi_n)) for letter in plaintext])
     print("[LOG] text encrypted.")
     with open('chiphertext', 'w+') as chipher:
@@ -101,11 +103,10 @@ def decrypt():
         keys = json.load(f)
     with open('chiphertext', 'r+') as chipher:
         ciphertext = chipher.read().split()
-    
-    dq = pow(keys['d'], 1, keys['q'] - 1)
-    dp = pow(keys['d'], 1, keys['p'] - 1)
 
-    decrypt = ''.join([chr(chineseremaindertheorem(dq, dp, keys['p'], keys['q'], ord(c))) for c in chiphertext])
+    dq = int(pow(keys['d'], 1, keys['q'] - 1))
+    dp = int(pow(keys['d'], 1, keys['p'] - 1))
+    decrypt = ''.join([chr(chineseremaindertheorem(dq, dp, keys['p'], keys['q'], int(c))) for c in ciphertext])
     with open('decrypted', 'w+') as chipher:
         chipher.write(decrypt)
 
