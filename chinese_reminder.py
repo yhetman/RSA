@@ -103,10 +103,11 @@ def decrypt():
         keys = json.load(f)
     with open('chiphertext', 'r+') as chipher:
         ciphertext = chipher.read().split()
-
     dq = int(pow(keys['d'], 1, keys['q'] - 1))
     dp = int(pow(keys['d'], 1, keys['p'] - 1))
-    decrypt = ''.join([chr(chineseremaindertheorem(dq, dp, keys['p'], keys['q'], int(c))) for c in ciphertext])
+    decrypt = ''
+    for c in ciphertext:
+        decrypt += chr(chineseremaindertheorem(dq, dp, keys['p'], keys['q'], int(c)))
     with open('decrypted', 'w+') as chipher:
         chipher.write(decrypt)
 
