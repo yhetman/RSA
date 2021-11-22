@@ -11,7 +11,7 @@
 #* ************************************************************************** *#
 
 
-SRCS = rsa.c miller_rabin_test.c
+SRCS =  miller_rabin_test.c rsa.c
 
 SRCS_DIR = src/
 
@@ -19,29 +19,27 @@ OBJ_DIR = obj/
 
 OBJ = $(addprefix $(OBJ_DIR), $(SRCS:.c=.o))
 
-OBJ_DIR = obj/
-
-LIB_NAME = librsa.a
+LIB_NAME = libRSA.a
 
 RSA = rsa
 
-FLAGS = -I /includes -Wall -Wextra -Werror -lgmpxx -lgmp
+FLAGS = -I includes -Wall -Wextra -Werror
 
 DEBUG_FLAGS = -g3 -fsanitize=address
 
-RSA_MAIN = src/main.c
+RSA_MAIN = src/main.c 
 
 all: make_obj_dir $(RSA)
 
-$(OBJ_DIR)%.o: $(SRCS_DIR)%.c
-	g++ $(FLAGS) -c $< -o $@
+$(OBJ_DIR)%.o: $(SRCS_DIR)%.c 
+	gcc $(FLAGS) -c $< -o $@
 
 $(LIB_NAME): $(OBJ)
 	ar -rv $(LIB_NAME) $^
 	ranlib $(LIB_NAME)
 
 $(RSA): $(LIB_NAME) $(RSA_MAIN)
-	g++ $(FLAGS) $(RSA_MAIN) $(LIB_NAME) -o $(RSA)
+	gcc $(FLAGS) $(RSA_MAIN) $(LIB_NAME) -o $(RSA) -lgmp
 
 make_obj_dir:
 	mkdir -p $(OBJ_DIR)

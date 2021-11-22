@@ -15,7 +15,7 @@
 
 
 static bool
-miller_check(mpz_t temp, mpz_t store, mpz_t prime, unsigned int num, t_random_assets randoms)
+miller_check(mpz_t temp, mpz_t store, mpz_t prime, unsigned int num, gmp_randstate_t random)
 {
 	mpz_t 	a,
 			x;
@@ -25,17 +25,17 @@ miller_check(mpz_t temp, mpz_t store, mpz_t prime, unsigned int num, t_random_as
 	mpz_init(a);
 	mpz_init(x);
 
-	mpz_urandomm(a, randoms.random, store);
-	mpz_powm(x, a, m, prime);
+	mpz_urandomm(a, random, store);
+	mpz_powm(x, a, temp, prime);
 
 	if (mpz_cmp_ui(prime, (unsigned int )1) == 0 ||
 		 mpz_cmp(prime, store) == 0)
 		return true;
 	
-	for (j = 0; j < a - 1; j++)
+	for (j = 0; j < num - 1; j++)
 	{
 		mpz_powm_ui(x, x, (unsigned long int)2, prime);
-		if (mpz_cmp_ui(x, (unsigned int )1) == 0)
+		if (mpz_cmp_ui(x, (unsigned int)1) == 0)
 			return false;
 		if (mpz_cmp(x, store) == 0)
 			return true;
@@ -44,7 +44,7 @@ miller_check(mpz_t temp, mpz_t store, mpz_t prime, unsigned int num, t_random_as
 }
 
 bool
-miller_rabin_test(mpz_t prime, t_random_assets randoms)
+miller_rabin_test(mpz_t prime, gmp_randstate_t randoms)
 {
 	unsigned int 	a;
 	size_t 			i;

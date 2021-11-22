@@ -21,7 +21,7 @@
 # include <stdbool.h>
 # include <math.h>
 # include <gmp.h>
-# include <gmpxx.h>
+// # include <gmpxx.h>
 # include <time.h>
 
 # define PRIMELEN		1024
@@ -55,8 +55,15 @@ typedef struct 				s_rsa
 }							t_rsa;
 
 
-bool 					miller_rabin_test(mpz_t prime);
+void 						init_rsa_struct(t_rsa *rsa);
 
-void					generate_primes(t_rsa *rsa);
+void 						generate_all_primes(t_rsa *rsa);
+
+void						calculate_keys(t_rsa *rsa);
+
+bool 						miller_rabin_test(mpz_t prime, gmp_randstate_t randoms);
+
+void						generate_all_primes(t_rsa *rsa);
+
 
 #endif
