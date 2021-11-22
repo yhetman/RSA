@@ -45,17 +45,22 @@ def chineseremaindertheorem(dq, dp, p, q, c):
 
 
 def create_public_key(num):
-    e = random.randint(2, num) 
+    e = random.randint(3, num) 
     while(gcd(e, num) != 1):
-        e = random.randint(2, num)
+        e = random.randint(3, num)
     return e 
 
 
+
 def generate_prime(keylen):
-    num = random.randint(0, keylen)
-    while(miller_rabin(num) != True):
-        num = random.randint(0, keylen)
+    min_val = 2 ** (keylen - 1)
+    max_val = 2 ** keylen - 1
+    num = random.randint(min_val, max_val)
+    while (miller_rabin(num) != True):
+        num = random.randint(min_val, max_val)
     return num
+
+
 
 
 def write_keys(keys):
@@ -66,18 +71,17 @@ def write_keys(keys):
 
 
 def encrypt(plaintext):
-
     p = generate_prime(1024)
     print("[LOG] p generated.", p)
     q = generate_prime(1024)
     print("[LOG] q generated.", q)
 
     n = p * q
-
+    
     phi_n = (p - 1) * (q - 1)
     print("[LOG] phi_n calculated.", phi_n)
 
-    e = create_public_key(phi_n)
+    e = create_public_key(phi_n - 1)
     print("[LOG] public key generated.", e)
 
     d = modinv(e, lcm(p - 1, q - 1))
@@ -101,11 +105,15 @@ def encrypt(plaintext):
 def decrypt():
     with open('keys.json', 'r+') as f:
         keys = json.load(f)
+    
     with open('chiphertext', 'r+') as chipher:
         ciphertext = chipher.read().split()
+    
     dq = int(pow(keys['d'], 1, keys['q'] - 1))
     dp = int(pow(keys['d'], 1, keys['p'] - 1))
+    
     decrypt = ''
+
     for c in ciphertext:
         decrypt += chr(chineseremaindertheorem(dq, dp, keys['p'], keys['q'], int(c)))
     with open('decrypted', 'w+') as chipher:

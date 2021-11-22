@@ -1,0 +1,58 @@
+#* ************************************************************************** *#
+#*                                                                            *#
+#*                                                                            *#
+#*   Makefile                                                                 *#
+#*                                                                            *#
+#*   By: yhetman <yhetman@student.unit.ua>                                    *#
+#*                                                                            *#
+#*   Created: 2021/11/22 17:02:24 by yhetman                                  *#
+#*   Updated: 2021/11/22 17:02:25 by yhetman                                  *#
+#*                                                                            *#
+#* ************************************************************************** *#
+
+
+SRCS = rsa.c miller_rabin_test.c
+
+SRCS_DIR = src/
+
+OBJ_DIR = obj/
+
+OBJ = $(addprefix $(OBJ_DIR), $(SRCS:.c=.o))
+
+OBJ_DIR = obj/
+
+LIB_NAME = librsa.a
+
+RSA = rsa
+
+FLAGS = -I includes -Wall -Wextra -Werror
+
+DEBUG_FLAGS = -g3 -fsanitize=address
+
+RSA_MAIN = src/main.c
+
+all: make_obj_dir $(RSA)
+
+$(OBJ_DIR)%.o: $(SRCS_DIR)%.c
+	gcc $(FLAGS) -c $< -o $@
+
+$(LIB_NAME): $(OBJ)
+	ar -rv $(LIB_NAME) $^
+	ranlib $(LIB_NAME)
+
+$(RSA): $(LIB_NAME) $(RSA_MAIN)
+	gcc $(FLAGS) $(RSA_MAIN) $(LIB_NAME) -o $(RSA)
+
+make_obj_dir:
+	mkdir -p $(OBJ_DIR)
+
+clean:
+	rm -rf $(OBJ_DIR)
+
+fclean: clean
+	rm -f $(RSA)
+	rm -f $(LIB_NAME)
+
+re: fclean all
+
+.PHONY: all clean flcean re debug
