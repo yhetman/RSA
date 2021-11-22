@@ -25,7 +25,7 @@ LIB_NAME = librsa.a
 
 RSA = rsa
 
-FLAGS = -I includes -Wall -Wextra -Werror
+FLAGS = -I /includes -Wall -Wextra -Werror -lgmpxx -lgmp
 
 DEBUG_FLAGS = -g3 -fsanitize=address
 
@@ -34,14 +34,14 @@ RSA_MAIN = src/main.c
 all: make_obj_dir $(RSA)
 
 $(OBJ_DIR)%.o: $(SRCS_DIR)%.c
-	gcc $(FLAGS) -c $< -o $@
+	g++ $(FLAGS) -c $< -o $@
 
 $(LIB_NAME): $(OBJ)
 	ar -rv $(LIB_NAME) $^
 	ranlib $(LIB_NAME)
 
 $(RSA): $(LIB_NAME) $(RSA_MAIN)
-	gcc $(FLAGS) $(RSA_MAIN) $(LIB_NAME) -o $(RSA)
+	g++ $(FLAGS) $(RSA_MAIN) $(LIB_NAME) -o $(RSA)
 
 make_obj_dir:
 	mkdir -p $(OBJ_DIR)

@@ -28,22 +28,35 @@
 # define CYCLES			64
 
 
-typedef struct 			s_rsa
+typedef struct 				s_random_assets 
 {
-	unsigned long int 	random_seed;
-	mpz_t				p;
-	mpz_t				q;
-	mpz_t				n; // p * q
-	mpz_t				phi_n;	// (p - 1) * (q - 1)
-	mpz_t				e; // public key
-	mpz_t				d; // private key
-	mpz_t				one;
-	mpz_t				message;
-	mpz_t				plaintext;
-	mpz_t				ciphertext;
-	gmp_randstate_t		random;
-}						t_rsa;
+	unsigned long int 		random_seed;
+	gmp_randstate_t			random;
+
+}							t_random_assets;
+
+
+
+typedef struct 				s_rsa
+{
+	// unsigned long int 	random_seed;
+	struct s_random_assets 	randoms;
+	mpz_t					p;
+	mpz_t					q;
+	mpz_t					n; // p * q
+	mpz_t					phi_n;	// (p - 1) * (q - 1)
+	mpz_t					e; // public key
+	mpz_t					d; // private key
+	mpz_t					one;
+	mpz_t					message;
+	mpz_t					plaintext;
+	mpz_t					ciphertext;
+	// gmp_randstate_t		random;
+}							t_rsa;
 
 
 bool 					miller_rabin_test(mpz_t prime);
+
+void					generate_primes(t_rsa *rsa);
+
 #endif

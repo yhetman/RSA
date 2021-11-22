@@ -32,9 +32,9 @@
 static inline void
 init_rsa_struct(t_rsa *rsa)
 {
-	rsa->random_seed = 1;
-	gmp_randinit_default(rsa->random);
-	gmp_randseed_ui(rsa->random, rsa->random_seed);
+	rsa->randoms.random_seed = 1;
+	gmp_randinit_default(rsa->randoms.random);
+	gmp_randseed_ui(rsa->randoms.random, rsa->randoms.random_seed);
 	mpz_init(rsa->p);
 	mpz_init(rsa->q);
 	mpz_init(rsa->n);
@@ -55,8 +55,10 @@ generate_primes(t_rsa *rsa)
 	bool	is_prime;
 
 	is_prime = false;
-	mpz_urandomb(p, random, PRIMELEN);
-	is_prime = miller_rabin_test(p);
+	mpz_urandomb(rsa->p, rsa->randoms.random, PRIMELEN);
+	is_prime = miller_rabin_test(rsa->p, rsa->randoms);
+	if (is_prime)
+		return;
 }
 
 int
