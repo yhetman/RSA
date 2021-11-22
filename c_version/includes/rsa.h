@@ -23,10 +23,15 @@
 # include <gmp.h>
 // # include <gmpxx.h>
 # include <time.h>
+# include "sha256.h"
 
 # define PRIMELEN		1024
-# define CYCLES			64
+# define MOD 			256
 
+# define CYCLES			64
+# define SHA256_HASH_SIZE 32
+
+# define OAEPLEN 		MOD-SHA256_HASH_SIZE-1
 
 typedef struct 				s_random_assets 
 {
@@ -39,7 +44,6 @@ typedef struct 				s_random_assets
 
 typedef struct 				s_rsa
 {
-	// unsigned long int 	random_seed;
 	struct s_random_assets 	randoms;
 	mpz_t					p;
 	mpz_t					q;
@@ -51,9 +55,16 @@ typedef struct 				s_rsa
 	mpz_t					message;
 	mpz_t					plaintext;
 	mpz_t					ciphertext;
-	// gmp_randstate_t		random;
 }							t_rsa;
 
+
+typedef struct 				s_oaep
+{
+	int 					mlength;
+	int 					llength;
+	t_bytes					hash;
+	int 					counter;
+}							t_oaep;
 
 void 						init_rsa_struct(t_rsa *rsa);
 

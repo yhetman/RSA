@@ -23,7 +23,7 @@ LIB_NAME = libRSA.a
 
 RSA = rsa
 
-FLAGS = -I includes -Wall -Wextra -Werror
+FLAGS = -I includes -I ../../SHA256/includes/ -Wall -Wextra -Werror
 
 DEBUG_FLAGS = -g3 -fsanitize=address
 
@@ -39,7 +39,7 @@ $(LIB_NAME): $(OBJ)
 	ranlib $(LIB_NAME)
 
 $(RSA): $(LIB_NAME) $(RSA_MAIN)
-	gcc $(FLAGS) $(RSA_MAIN) $(LIB_NAME) -o $(RSA) -lgmp
+	gcc $(FLAGS) $(RSA_MAIN) $(LIB_NAME) libSHA256.a -o $(RSA) -lgmp 
 
 make_obj_dir:
 	mkdir -p $(OBJ_DIR)
