@@ -72,26 +72,25 @@ void encrypt(t_rsa *rsa)
 }
 
 int
-main() //int argc, char const *argv[])
+main()
 {
 	t_rsa	rsa;
-	char	message[PRIMELEN];
-			// buff[PRIMELEN];
+	// char	message[PRIMELEN];
 
 	init_rsa_struct(&rsa);
 	generate_all_primes(&rsa);
 	calculate_keys(&rsa);
 
 
-	printf("Enter message to encrypt: ");
-	scanf("%1023s", message);
+	// printf("Enter message to encrypt: ");
+	// scanf("%1023s", message);
 	
-	mpz_import(rsa.message, PRIMELEN, 1, sizeof(message[0]), 0, 0, message);
-    encrypt(&rsa);
-    printf("Encrypted is :\n%s\n", mpz_get_str(NULL, 16, rsa.ciphertext));
-   	decrypt(&rsa);
-    printf("Decrypted is :\n%s\n", mpz_get_str(NULL, 16, rsa.plaintext));
+	// mpz_import(rsa.message, PRIMELEN, 1, sizeof(message[0]), 0, 0, message);
+ //    encrypt(&rsa);
+ //    printf("Encrypted is :\n%s\n", mpz_get_str(NULL, 16, rsa.ciphertext));
+ //   	decrypt(&rsa);
+ //    printf("Decrypted is :\n%s\n", mpz_get_str(NULL, 16, rsa.plaintext));
 
-	// rsa_oaep(&rsa);
+	rsa_oaep(&rsa);
 	return 0;
 }

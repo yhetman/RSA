@@ -25,7 +25,7 @@
 # include <time.h>
 # include "sha256.h"
 
-# define PRIMELEN		1024
+# define PRIMELEN		2048
 # define MOD 			256
 
 # define CYCLES			64
