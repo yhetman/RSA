@@ -13,111 +13,85 @@
 #include "rsa.h"
 
 
-unsigned char *
-padding(int messagelen, uint8_t hash)
+void decrypt_ctr(t_rsa *rsa)
 {
-	int 			len,
-					i,
-					padding_length;
+	mpz_t 	dp,
+			dq,
+			m1,
+			m2,
+			subd,
+			qinv,
+			h;
 
-	unsigned char 	frame[OAEPLEN + 1];
+	mpz_init(h);
+	mpz_init(m1);
+	mpz_init(m2);
+	mpz_init(dp);
+	mpz_init(dq);
+	mpz_init(subd);
+	mpz_init(qinv);
 
+	mpz_sub_ui(subd, rsa->p, 1UL);
+	mpz_powm_ui(dp, rsa->d, 1UL, subd);
 
-	len = MOD - 2 - 2 * SHA256_HASH_SIZE;
+	mpz_sub_ui(subd, rsa->q, 1UL);
+	mpz_powm_ui(dq, rsa->d, 1UL, subd);
 
-	padding_length = len - messagelen;
-	
-	for(i = 0; i < SHA256_HASH_SIZE; i++)
-		frame[i] = (unsigned char)hash[i];
+	mpz_powm(m1, rsa->ciphertext, dp, rsa->p);
+	mpz_powm(m2, rsa->ciphertext, dq, rsa->q);
 
-	for (i = 0; i < padding_length; i++)
-		frame[i + SHA256_HASH_SIZE] = '0';
+	mpz_invert(qinv, rsa->q, rsa->p);
 
-	frame[SHA256_HASH_SIZE + padding_length] = '1';
+	mpz_sub(m1, m1, m2);
+	mpz_mul(qinv, qinv, m1);
+	mpz_powm_ui(h, qinv, 1UL, rsa->p);
+	mpz_mul(h, h, rsa->q);
+	mpz_add(rsa->plaintext, h, m2);
 
-	for (i = 0; i < messagelen; i++)
-		frame[SHA256_HASH_SIZE + padding_length + i] = message[i];
-
-	frame[OAEPLEN] = '\0';
-
-	printf("%s\n", frame);
-	return (frame);
+	mpz_clear(m1);
+	mpz_clear(m2);
+	mpz_clear(h);
+	mpz_clear(qinv);
+	mpz_clear(subd);
+	mpz_clear(dq);
+	mpz_clear(dp);
 }
 
 
-
-unsigned char *
-forming_random_seed()
+void decrypt(t_rsa *rsa)
 {
-	unsigned char 	seed[SHA256_HASH_SIZE + 1],
-					*extended_seed;
-	int  			i,
-					ceil;
-
-	srand(time(NULL));
-
-	for(i = 0; i < SHA256_HASH_SIZE;i++)
-		seed[i] = (char) rand() % 128;
-
-	seed[SHA256_HASH_SIZE] = '\0';
-
-	ceil = ceil((double)OAEPLEN / 20) - 1;
-	
-	extendedSeed = (unsigned char*)malloc(sizeof(unsigned char) * 20 *(ceil + 1));
-
-	// mask_generation(ceil, SHA256_HASH_SIZE, seed, extendedSeed);
-	return extendedSeed;
+	mpz_powm(rsa->plaintext, rsa->ciphertext, rsa->d, rsa->n); 
+    return;
 }
 
 
-void
-encode_oaep(char *message, char *mlabel)
+void encrypt(t_rsa *rsa)
 {
-	// mpz_t 		encoded;
-	FILE  			*hash256;
-	t_oaep 			oaep;
-	unsigned char 	*padded;
-
-	// len = MOD - 2 - 2 * SHA256_HASH_SIZE;
-	oaep.mlength = strlen(message);
-	oaep.llength = strlen(mlabel);
-	
-	if (oaep.mlength > (MOD - 2 - 2 * SHA256_HASH_SIZE))
-		fprintf(stderr, "%s\n", "Message is too long, sorry :( ");
-
-	calculate_sha256(mlabel, sizeof(mlabel), &oaep.hash);
-	
-	hash256 = fopen("./hash256", "w+");
-	
-	fwrite(oaep.hash.bytes, sizeof(unsigned char), SHA256_HASH_SIZE, hash256);
-	
-	fclose(hash256);
-	
-	padded = padding(oaep.mlength, oaep.hash.bytes);
-
-	return;
+	mpz_powm(rsa->ciphertext, rsa->message, rsa->e, rsa->n); 
+    return;
 }
-
 
 int
 main() //int argc, char const *argv[])
 {
 	t_rsa	rsa;
-	char	message[PRIMELEN], 
-			mlabel[PRIMELEN];
+	char	message[PRIMELEN];
+			// buff[PRIMELEN];
 
 	init_rsa_struct(&rsa);
 	generate_all_primes(&rsa);
 	calculate_keys(&rsa);
 
+
 	printf("Enter message to encrypt: ");
 	scanf("%1023s", message);
+	
+	mpz_import(rsa.message, PRIMELEN, 1, sizeof(message[0]), 0, 0, message);
+    encrypt(&rsa);
+    printf("Encrypted is :\n%s\n", mpz_get_str(NULL, 16, rsa.ciphertext));
+   	decrypt(&rsa);
+    printf("Decrypted is :\n%s\n", mpz_get_str(NULL, 16, rsa.plaintext));
 
-	printf("Enter message's label to encrypt: ");
-	scanf("%1023s", mlabel);
-
-	encode_oaep(message, mlabel);
-
-
+	// rsa_oaep(&rsa);
 	return 0;
 }
